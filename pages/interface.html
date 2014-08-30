@@ -1,0 +1,362 @@
+<!DOCTYPE HTML>
+ <html>
+   <head>    
+
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+        <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+    <style>
+	body {		
+		width:300px;
+		padding-left:1px;
+		padding-top:20px;
+		height:500px;
+        }
+	
+    #myCanvas {
+		border: 0px dashed grey;
+		height:100px;
+        }
+	canvas {
+		width:300px;
+        }
+	table,th,td
+		{
+		border:0px solid black;
+		}
+
+    </style>
+    
+	
+    <!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <script src="/js/jquery.knob.js"></script>
+    <script>
+    window.scrollTo(0,1);
+	// canvas request for all browsers
+	window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame || 
+        window.mozRequestAnimationFrame || 
+        window.oRequestAnimationFrame || 
+        window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 30); // 30 frames per second
+	  };
+	})();
+	  
+	var iosocket;
+	var pollOneH = 0;
+	var pollOneHsel = 0;
+	var pollOneHpow = 0;
+	var poll1;
+	var text;
+	var potValue;
+	var prevPotValue;
+	//var onOff = false; 
+	var toggleVal = 0;
+	var selValue; 
+	var powValue;  
+	var oldSelValue = 0;
+	var oldPowValue = 0;
+	var oldPotValue = 0;
+	var UserMove = 0;
+	function animation(poll1,text)
+	{
+	  var canvas = document.getElementById("myCanvas");
+      var content = canvas.getContext("2d");
+
+		
+	potValue = pollOneH;
+	selValue = pollOneHsel;
+	powValue = pollOneHpow;
+	if(oldPotValue != potValue)
+     {
+	  $('.dial')
+    	.val(potValue)
+    	.trigger('change');
+   	}
+   	 if(oldPowValue != powValue)
+     {
+		if(powValue == "f")
+		{
+			$( "#checkOnOff" ).prop( "checked", true );
+    		$( "#checkOnOff" ).button("refresh");
+    		
+    		$( "#checkAM" ).button( "option", "disabled", true );
+    		$( "#checkFM" ).button( "option", "disabled", true );
+    		$( "#checkPHONO" ).button( "option", "disabled", true );
+    		$( "#checkAUX" ).button( "option", "disabled", true );
+    		$( "#checkTAPE1" ).button( "option", "disabled", true );
+    		$( "#checkTAPE2" ).button( "option", "disabled", true );
+    		$( "#checkAM" ).button("refresh");
+			$( "#checkFM" ).button("refresh");
+			$( "#checkPHONO" ).button("refresh");
+			$( "#checkAUX" ).button("refresh");
+			$( "#checkTAPE1" ).button("refresh");
+			$( "#checkTAPE2" ).button("refresh");
+		}
+		if(powValue == "o")
+		{
+			$( "#checkOnOff" ).prop( "checked", false );
+    		$( "#checkOnOff" ).button("refresh");
+    		
+    		$( "#checkAM" ).button( "option", "disabled", false );
+    		$( "#checkFM" ).button( "option", "disabled", false );
+    		$( "#checkPHONO" ).button( "option", "disabled", false );
+    		$( "#checkAUX" ).button( "option", "disabled", false );
+    		$( "#checkTAPE1" ).button( "option", "disabled", false );
+    		$( "#checkTAPE2" ).button( "option", "disabled", false );
+    		$( "#checkAM" ).button("refresh");
+			$( "#checkFM" ).button("refresh");
+			$( "#checkPHONO" ).button("refresh");
+			$( "#checkAUX" ).button("refresh");
+			$( "#checkTAPE1" ).button("refresh");
+			$( "#checkTAPE2" ).button("refresh");
+		}
+     	oldPowValue = powValue;
+     }	
+     if(oldSelValue != selValue)
+     {
+     	$( "#checkAM" ).prop( "checked", true );
+    	$( "#checkFM" ).prop( "checked", true );
+    	$( "#checkPHONO" ).prop( "checked", true );
+    	$( "#checkAUX" ).prop( "checked", true );
+    	$( "#checkTAPE1" ).prop( "checked", true );
+    	$( "#checkTAPE2" ).prop( "checked", true );
+     	$( "#checkAM" ).button("refresh");
+		$( "#checkFM" ).button("refresh");
+		$( "#checkPHONO" ).button("refresh");
+		$( "#checkAUX" ).button("refresh");
+		$( "#checkTAPE1" ).button("refresh");
+		$( "#checkTAPE2" ).button("refresh");
+	 	switch(selValue)
+	   	{
+	   			case ("G"):
+    				{
+    					$( "#checkAM" ).prop( "checked", false );
+    					$( "#checkAM" ).button("refresh");
+    					break;
+    				}	
+    			case ("H"):
+    				{
+    					$( "#checkFM" ).prop( "checked", false );
+    					$( "#checkFM" ).button("refresh");
+    					break;
+    				}
+    			case ("I"):
+    				{
+    					$( "#checkPHONO" ).prop( "checked", false );
+    					$( "#checkPHONO" ).button("refresh");
+    					break;
+    				}
+    			case ("J"):
+    				{
+    					$( "#checkAUX" ).prop( "checked", false );
+    					$( "#checkAUX" ).button("refresh");
+    					break;
+    				}
+    			case ("K"):
+    				{
+    					$( "#checkTAPE1" ).prop( "checked", false );
+    					$( "#checkTAPE1" ).button("refresh");
+    					break;
+    				}
+    			case ("L"):
+    				{
+    					$( "#checkTAPE2" ).prop( "checked", false );
+    					$( "#checkTAPE2" ).button("refresh");
+    					break;
+    				}
+	   	  	}  
+	   		
+		   	oldSelValue = selValue;
+		   	//console.log($( "#checkAM" ).button("refresh"));
+	   }
+	   
+	  //content.fillText('Potmeter value: ' + potValue, text.x, text.y-60);
+	  //content.fillText('Selector value: ' + selValue, text.x, text.y-40);
+	  //content.fillText('Power value: ' + powValue, text.x, text.y-20);
+          // render graph 
+	/*  content.fillStyle = 'orange';
+	  content.fillRect(poll1.x,(poll1.y-poll1.h),poll1.w,poll1.h);
+			*/			
+	  content.fill();
+
+	  // request new frame
+	  requestAnimFrame(function() {
+	  animation(poll1,text);
+	 });
+	}
+	  
+	function initSocketIO()
+	{
+		initButton();
+		initButtonAM();
+		initButtonFM();
+		initButtonPHONO();
+		initButtonAUX();
+		initButtonTAPE1();
+		initButtonTAPE2();
+		
+		initVolMoins();
+		initVolPlus();
+		iosocket = io.connect();
+		iosocket.on('onconnection', function(value) {
+		pollOneH = value.pollOneValue*2;///2; // recieve start poll value from server
+		initPoll();
+
+		//initSlider();
+				
+		// recieve changed values by other client from server
+		iosocket.on('updateData', function (recievedData) {
+			pollOneH = recievedData.pollOneValue;///2; // recieve start poll value from server
+		});
+		iosocket.on('updateSelData', function (recievedData) {
+			pollOneHsel = recievedData.pollOneValue;///2; // recieve start poll value from server
+		});
+		iosocket.on('updatePowData', function (recievedData) {
+			pollOneHpow = recievedData.pollOneValue;///2; // recieve start poll value from server
+		});
+	    });
+	    $(".dial").knob({
+                'min':0,
+                'max':70,
+                'width':300,
+                'height':300,
+				'cursor':10,
+				'thickness':.3,
+				'displayInput':false,
+				'fgColor':"#222222",
+				'angleOffset':200,
+				'angleArc':320,
+                'change' : function (v) { 
+                	//if(UserMove == 1)
+                	//potValue = v;
+                	//oldPotValue = potValue;
+                		iosocket.emit('sliderval',v);
+                	}
+                });
+
+	}
+	
+	  
+	function initPoll()
+	{
+	   /*poll1 = {
+		x: 10,
+		y: 11,
+		w: 1,
+		h: 0
+	   }
+	   text = {
+		x:poll1.w/2,
+		y:100
+	   }*/
+	   potValue = pollOneH;//*2;
+	   selValue = pollOneHsel;
+	   powValue = pollOneHpow;
+	   //prevPotValue = potValue;
+	   
+	   animation(poll1,text);
+	}
+	
+	function initButton()
+	{
+	   $( "#checkOnOff" ).button();
+	}
+	function initButtonAM()
+	{
+	   $( "#checkAM" ).button();
+	}
+	function initButtonFM()
+	{
+	   $( "#checkFM" ).button();
+	}
+	function initButtonPHONO()
+	{
+	   $( "#checkPHONO" ).button();
+	}
+	function initButtonAUX()
+	{
+	   $( "#checkAUX" ).button();
+	}
+	function initButtonTAPE1()
+	{
+	   $( "#checkTAPE1" ).button();
+	}
+	function initButtonTAPE2()
+	{
+	   $( "#checkTAPE2" ).button();
+	}
+	function initVolMoins()
+	{
+	   $( "#VolMoins" ).button();
+	}
+	function initVolPlus()
+	{
+	   $( "#VolPlus" ).button();
+	}
+	window.onload = function() {
+	     initSocketIO();
+        };
+      
+    $(document).ready(function() 
+    {
+        $('#checkOnOff').click(function() 
+        {
+            toggleVal += 1;
+        	var ooff=new Array('o','f');
+	    	toggleVal %= 2;
+	    	iosocket.emit('buttonval',ooff[toggleVal]);
+	 	});
+	 	$('#checkAM').click(function() {iosocket.emit('SelectorSend',"G")});
+	 	$('#checkFM').click(function() {iosocket.emit('SelectorSend',"H")});
+	 	$('#checkPHONO').click(function() {iosocket.emit('SelectorSend',"I")});
+	 	$('#checkAUX').click(function() {iosocket.emit('SelectorSend',"J")});
+	 	$('#checkTAPE1').click(function() {iosocket.emit('SelectorSend',"K")});
+	 	$('#checkTAPE2').click(function() {iosocket.emit('SelectorSend',"L")});
+	 	
+	 	$('#VolPlus').click(function() {iosocket.emit('VolStep',"+")});
+	 	$('#VolMoins').click(function() {iosocket.emit('VolStep',"-")});
+	});
+	window.scrollTo(0,0);
+    </script>
+   
+        
+  </head>
+  <body>
+  <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1.0, user-scalable=0">
+<table width="300">
+	<col width=100><col width=100><col width=100>
+	<tr width="300">
+		<td width="100" ><input type="checkbox" id="checkAM" value="toggle"/><label for="checkAM">AM</label></td>
+		<td width="100" align="center"><input type="checkbox" id="checkFM" value="toggle"/><label for="checkFM">FM</label></td>
+		<td width="100" align="right"><input align="right"type="checkbox" id="checkPHONO"  value="toggle"/><label for="checkPHONO">PHONO</label></td>
+	</tr>
+	<tr width="300">
+		<td width="100" ><input type="checkbox" id="checkAUX" value="toggle"/><label for="checkAUX">AUX</label></td>
+		<td width="100" align="center"><input type="checkbox" id="checkTAPE1" value="toggle"/><label for="checkTAPE1">TAPE1</label></td>
+		<td width="100" align="right"><input type="checkbox" id="checkTAPE2" value="toggle"/><label for="checkTAPE2">TAPE2</label></td>
+	</tr>
+	<tr>
+	
+	</tr>
+	<tr>
+		<td colspan="3"><input class="dial" style="height:800px;width:100%"></td>
+	</tr>
+	<tr>
+		<td align="left"><input type="submit" id="VolMoins" value="-"/><label for="VolMoins"></label></td>
+		<td align="center"><input type="checkbox" id="checkOnOff" value="toggle"/><label for="checkOnOff">ON</label></td>
+		<td align="right"><input type="submit" id="VolPlus" value="+"/><label for="VolPlus"></label></td>
+	</tr>
+	 </table>
+	 
+   		
+   
+
+	
+    <canvas id="myCanvas" width="0" height="1"></canvas>
+
+  </body>
+</html>
